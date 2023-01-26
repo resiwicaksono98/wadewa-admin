@@ -958,6 +958,14 @@ picomatch@^2.0.4, picomatch@^2.2.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
+pinia@^2.0.29:
+  version "2.0.29"
+  resolved "https://registry.yarnpkg.com/pinia/-/pinia-2.0.29.tgz#b7e672980fdb14e03839e8139ce55ca97843679d"
+  integrity sha512-5z/KpFecq/cIgfeTnulJXldiLcTITRkTe3N58RKYSj0Pc1EdR6oyCdnf5A9jLoVwBqX5LtHhd0kGlpzWvk9oiQ==
+  dependencies:
+    "@vue/devtools-api" "^6.4.5"
+    vue-demi "*"
+
 png-js@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/png-js/-/png-js-1.0.0.tgz#e5484f1e8156996e383aceebb3789fd75df1874d"
@@ -1238,6 +1246,11 @@ vue-cookies@^1.8.2:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/vue-cookies/-/vue-cookies-1.8.2.tgz#39515fa09ebb585a50ac86c0e182a6b9307dc6ad"
   integrity sha512-+NfoC5l+7ybuVwpnqsf52qndnoYMjEb4EFhX4/j9RzzQP00dNzuJELsWuW2p8omNUzNlSgWGVyyWoOeJr347tw==
+
+vue-demi@*:
+  version "0.13.11"
+  resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.11.tgz#7d90369bdae8974d87b1973564ad390182410d99"
+  integrity sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==
 
 vue-router@4:
   version "4.1.6"

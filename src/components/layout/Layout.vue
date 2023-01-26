@@ -22,6 +22,7 @@
 <script>
    import axios from "axios";
    import { useRouter } from "vue-router";
+   import { httpRequest } from "../../utils/axiosInstance";
    import SidebarVue from "../Sidebar.vue";
 
    export default {
@@ -30,10 +31,13 @@
       setup() {
          const router = useRouter();
          const logout = () => {
-            axios
-               .delete(`http://localhost:5000/api/admin/auth/logout`)
-               .then(() => {
-                  router.push({ name: "login" });
+            httpRequest
+               .delete(`/admin/auth/logout`)
+               .then((res) => {
+                  if (res.status === 200) {
+                     alert("logout success");
+                     router.go();
+                  }
                })
                .catch((err) => alert("error"));
          };

@@ -11,24 +11,25 @@
                   <form @submit.prevent="update()">
                      <div class="form-floating mb-3">
                         <select class="form-select" id="floatingSelect" aria-label="Floating label select example" v-model="complaintResult.status">
-                           <option selected value="">Open this select status</option>
-                           <option v-for="(stat, i) in status" :key="i" :value="stat.name">
-                              {{ stat.name }}
+                           <option selected value="">Open this select menu</option>
+                           <option v-for="(stat, i) in status" :key="i" :value="stat.value">
+                              {{ stat.value }}
                            </option>
                         </select>
-                        <label for="floatingSelect">Complaint Type</label>
+                        <label for="floatingSelect">Complaint Status</label>
                      </div>
                      <div class="mb-3">
                         <label for="" class="form-label">Message</label>
                         <textarea name="" class="form-control" v-model="complaintResult.message"></textarea>
                         <div class="text-danger">{{ validation.message }}</div>
                      </div>
-                     <button type="submit" class="btn btn-outline-primary" @click="createPdf">Generate Pdf</button>
-                     <div class="mb-3">
-                        <label for="" class="form-label">Choose file</label>
-                        <input type="file" @change="onFileChange" class="form-control" aria-describedby="fileHelpId" />
+                     <button type="button" :disabled="complaintResult.status === 'success' ? false : true" class="btn btn-outline-primary mb-3" @click="createPdf">Generate Files</button>
+                     <div class="mb-3" :hidden="!complaintResult.files ? true : false">
+                        <a :href="'http://localhost:5000/' + complaintResult.files" target="_blank">LINK SURAT</a>
                      </div>
-                     <button type="submit" class="btn btn-outline-primary">Submit</button>
+                     <div>
+                        <button type="submit" class="btn btn-outline-primary">Submit</button>
+                     </div>
                   </form>
                </div>
             </div>
@@ -52,9 +53,57 @@
          },
          createPdf() {
             const docDefinition = {
-               content: [{ text: "Name: " + "resi" }, { text: "Age: " + "wicaksono" }],
+               content: [
+                  {
+                     stack: ["PEMERINTAH PROVINSI JAWA TENGAH", "KETUA RT.04 RW.07 DESA KWASEN", ["KECAMATAN KESESI-KABUPATEN PEKALONGAN"], { text: "________________________________________________________________________________", style: "subheader" }],
+
+                     style: "header",
+                  },
+                  {
+                     stack: [`${this.letters.name}`, "________________________________", `No. ${this.letters.number}/sekrt-RT/II/2023`],
+                     style: "header",
+                  },
+                  {
+                     text: ["Yang bertanda tangan di bawah ini Ketuan RT02 RW07 Desa Kwasen Kecamatan Kesesi ", "kabupaten Pekalongan Jawa tengah dengan ini menyatakan bahwa:\n"],
+                  },
+                  {
+                     text: `Nama Lengkap: ${this.citizen.name}\n NIK:${this.citizen.nik}\nStatus Perkawinan:${this.citizen.status}\nWarga Negara:Indonesia`,
+
+                     margin: [20, 20],
+                  },
+
+                  {
+                     stack: [`Orang tersebut diatas, adalah benar-benar warga kami dan berdomisili di RT.04\n RW.07 DESA Kwasen Kecamatan Kesesi Kabupaten Pekalongan Jawa Tengah.\nSurat keterangan ini dibuat sebagai kelengkapan pengurus ${this.letters.name}", "Demikian Surat keterangan ini kami buat\, untuk dapat dipergunakan sebagaimana mestinya.\n`],
+                     margin: [10, 20, 10, 10],
+                     alignment: "justify",
+                  },
+                  {
+                     text: "Jakarta, 20 Januari 2023\n Kepala Desa Kwasen",
+                     margin: [300, 20, 0, 50],
+                     aligment: "right",
+                  },
+                  {
+                     text: `${this.letters.village_head}`,
+                     margin: [340, 20, 0, 50],
+                     aligment: "right",
+                  },
+               ],
+               styles: {
+                  header: {
+                     fontSize: 18,
+                     bold: true,
+                     alignment: "center",
+                     margin: [0, 0, 0, 80],
+                  },
+                  subheader: {
+                     fontSize: 14,
+                  },
+               },
             };
-            pdfMake.createPdf(docDefinition).open();
+            pdfMake.createPdf(docDefinition).getBlob((dataURL) => {
+               this.complaintResult.files = new File([dataURL], `test.pdf`, {});
+               alert("Letter Generate Successfully");
+            });
          },
       },
       setup() {
@@ -65,7 +114,19 @@
             files: "",
          });
 
-         const status = reactive([{ name: "pending" }, { name: "success" }, { name: "rejected" }]);
+         const letters = reactive({
+            name: "",
+            number: "",
+            village_head: "",
+         });
+
+         const citizen = reactive({
+            name: "",
+            nik: "",
+            status: "",
+         });
+
+         const status = reactive([{ value: "pending" }, { value: "success" }, { value: "rejected" }]);
 
          const validation = ref([]);
 
@@ -76,8 +137,15 @@
             await httpRequest
                .get(`/admin/complaintResult/${route.params.id}`)
                .then((res) => {
+                  citizen.name = res.data.data.citizen.name;
+                  citizen.nik = res.data.data.citizen.nik;
+                  citizen.status = res.data.data.citizen.status;
+                  letters.name = res.data.data.letter.title;
+                  letters.number = res.data.data.letter.letter_number;
+                  letters.village_head = res.data.data.letter.village_head;
                   complaintResult.status = res.data.data.status;
                   complaintResult.message = res.data.data.message;
+                  complaintResult.files = res.data.data.files;
                })
                .catch((err) => console.log(err));
          });
@@ -89,22 +157,23 @@
                      "Content-Type": "multipart/form-data",
                   },
                })
-               .then(() => {
-                  router
-                     .push({
-                        name: "complaint.index",
-                     })
-                     .catch((err) => {
-                        validation.value = err.response.data;
-                     });
+               .then((res) => {
+                  router.push({
+                     name: "complaint.index",
+                  });
+               })
+               .catch((err) => {
+                  validation.value = err.response.data;
                });
          }
          return {
             status,
             complaintResult,
+            letters,
             validation,
             router,
             update,
+            citizen,
          };
       },
    };

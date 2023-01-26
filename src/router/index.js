@@ -2,20 +2,16 @@
 
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/auth/Login.vue";
-import Register from "../components/auth/Register.vue";
 import Layout from "../components/layout/Layout.vue";
 import Dashboard from "../components/Dashboard.vue";
+import { useAuthStore } from "../store/auth";
 
 const routes = [
    {
       path: "/login",
       name: "login",
       component: Login,
-   },
-   {
-      path: "/register",
-      name: "register",
-      component: Register,
+      meta: { noAuth: true },
    },
    {
       path: "/",
@@ -92,17 +88,20 @@ const router = createRouter({
    routes,
 });
 
-router.beforeEach((to, from, next) => {
-   const user = $cookies.get("authenticated");
-   if (to.matched.some((record) => record.meta.requiresAuth) && !user) {
-      // Jika rute yang dituju memerlukan autentikasi dan pengguna belum login, arahkan ke halaman login
-      next({ name: "login" });
-   } else if ((to.name === "login") | (to.name === "register") && user) {
-      next({ name: "news.index" });
-   } else {
-      // Jika tidak, lanjutkan ke rute yang dituju
-      next();
+router.beforeEach(async (to, from, next) => {
+   const authStore = useAuthStore();
+   await authStore.me();
+   if (to.meta.requiresAuth) {
+      if (!authStore.user) {
+         return next({ name: "login" });
+      }
    }
+   if (to.meta.noAuth) {
+      if (authStore.user) {
+         return next({ name: "news.index" });
+      }
+   }
+   return next();
 });
 
 export default router;

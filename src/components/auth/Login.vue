@@ -2,7 +2,7 @@
 
 <template>
    <div class="container my-5">
-      <h3 class="text-center">Login Page</h3>
+      <h3 class="text-center">Login Admin</h3>
 
       <form @submit.prevent="login()">
          <div class="text-danger text-center my-3">{{ validation && validation }}</div>
@@ -16,20 +16,21 @@
          </div>
          <div class="d-grid gap-2">
             <button type="submit" class="btn btn-primary">Login</button>
-            <button type="button" class="btn btn-success" @click="register">Register</button>
          </div>
       </form>
    </div>
 </template>
 
 <script>
-   import { reactive, ref } from "vue";
+   import { reactive, ref, computed, watchEffect } from "vue";
    import { useRouter } from "vue-router";
    import { httpRequest } from "../../utils/axiosInstance";
+   import { useAuthStore } from "../../store/auth";
 
    export default {
       setup() {
          const router = useRouter();
+         const authStore = useAuthStore();
 
          const dataUser = reactive({
             email: "",
@@ -38,22 +39,19 @@
 
          const validation = ref("");
 
-         const login = async () => {
-            await httpRequest
-               .post("/admin/auth/login", dataUser)
-               .then((res) => {
-                  router.push({ name: "news.index" });
-               })
-               .catch((err) => {
-                  validation.value = err.response.data.msg;
-               });
+         watchEffect(() => {
+            if (authStore.user) {
+               alert("success login");
+               router.go();
+            }
+         });
+
+         const login = () => {
+            authStore.loginAdmin(dataUser);
          };
-         const register = () => {
-            router.push({ name: "register" });
-         };
+
          return {
             login,
-            register,
             dataUser,
             validation,
          };
