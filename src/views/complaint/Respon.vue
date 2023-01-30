@@ -24,9 +24,10 @@
                         <div class="text-danger">{{ validation.message }}</div>
                      </div>
                      <button type="button" :disabled="complaintResult.status === 'success' ? false : true" class="btn btn-outline-primary mb-3" @click="createPdf">Generate Files</button>
-                     <div class="mb-3" :hidden="!complaintResult.files ? true : false">
+                     <div class="mb-3" :hidden="!temporaryFiles ? true : false">
                         <a :href="'http://localhost:5000/' + complaintResult.files" target="_blank">LINK SURAT</a>
                      </div>
+
                      <div>
                         <button type="submit" class="btn btn-outline-primary">Submit</button>
                      </div>
@@ -102,7 +103,8 @@
             };
             pdfMake.createPdf(docDefinition).getBlob((dataURL) => {
                this.complaintResult.files = new File([dataURL], `test.pdf`, {});
-               alert("Letter Generate Successfully");
+               alert("Generate Surat Berhasil, Submit untuk simpan");
+               pdfMake.createPdf(docDefinition).open();
             });
          },
       },
@@ -126,6 +128,8 @@
             status: "",
          });
 
+         const temporaryFiles = ref("");
+
          const status = reactive([{ value: "pending" }, { value: "success" }, { value: "rejected" }]);
 
          const validation = ref([]);
@@ -146,6 +150,7 @@
                   complaintResult.status = res.data.data.status;
                   complaintResult.message = res.data.data.message;
                   complaintResult.files = res.data.data.files;
+                  temporaryFiles.value = res.data.data.files;
                })
                .catch((err) => console.log(err));
          });
@@ -174,6 +179,7 @@
             router,
             update,
             citizen,
+            temporaryFiles,
          };
       },
    };

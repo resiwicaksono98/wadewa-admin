@@ -24,7 +24,6 @@
 <script>
    import { reactive, ref, computed, watchEffect } from "vue";
    import { useRouter } from "vue-router";
-   import { httpRequest } from "../../utils/axiosInstance";
    import { useAuthStore } from "../../store/auth";
 
    export default {
